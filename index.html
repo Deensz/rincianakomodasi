@@ -818,16 +818,16 @@ function notaGenerator() {
                 <html>
                 <head>
                     <title>Nota</title>
-                    \${styleBlocks}
+                    ${styleBlocks}
                     <style>
-                        @page { margin: 0; size: \${receiptWidth} auto; }
+                        @page { margin: 0; size: ${receiptWidth} auto; }
                         * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
                         body { margin: 0; padding: 0; background: #fff; display: block; }
                         .receipt-container { margin: 0 auto; min-height: auto; box-shadow: none !important; }
                     </style>
                 </head>
                 <body>
-                    \${printContent}
+                    ${printContent}
                 </body>
                 </html>
             `);
