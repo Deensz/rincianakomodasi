@@ -1,0 +1,877 @@
+<?php
+
+$claim = null; 
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Generate Nota Otomatis - Native PHP</title>
+    
+    <!-- CSS & JS Libraries (CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+    <style>
+        /* Bakmi Gocit Styles */
+        .thermal-font {
+            font-family: 'Courier New', Courier, monospace;
+            color: #000;
+            line-height: 1.2;
+            font-size: 13px;
+        }
+        .dashed-line { border-bottom: 1px dashed #000; margin: 6px 0; height: 1px; width: 100%; }
+        .double-line { border-bottom: 1px dashed #000; border-top: 1px dashed #000; height: 4px; margin: 8px 0; }
+        .flex-between { display: flex; justify-content: space-between; }
+
+        /* RotiO Styles */
+        .font-rotio {
+            font-family: 'Consolas', 'Lucida Console', 'Monaco', monospace;
+            font-size: 11px;
+            letter-spacing: 0px;
+            color: #222;
+            line-height: 1.2;
+        }
+
+        /* Laundry Styles */
+        .font-laundry {
+            font-family: 'Consolas', 'Courier New', monospace;
+            font-size: 14px;
+            color: #000;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        /* GoFood Styles */
+        .gofood-wrapper {
+            background-color: #f7f9fa;
+            padding: 20px;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+            color: #1c1c1c;
+            font-size: 11px;
+        }
+        .gofood-container {
+            background-color: #fff;
+            max-width: 440px;
+            margin: 0 auto;
+            border-radius: 4px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+        .gofood-header {
+            background-color: #ed212b;
+            color: #fff;
+            padding: 16px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .gofood-body { padding: 24px 20px; }
+        .gofood-total-box {
+            padding: 12px 0px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 8px 0;
+            border-top: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .gofood-green { color: #00aa5b; font-weight: 800; font-size: 18px;}
+        .gofood-section-title { font-weight: 800; font-size: 13px; margin-bottom: 12px; }
+        .gofood-subtext { font-size: 11px; color: #4a4a4a; margin-top: 4px; line-height: 1.4; }
+        
+        .gofood-delivery-box {
+            padding: 8px 0px;
+            margin-top: 12px;
+            display: flex;
+        }
+        .gofood-delivery-left { width: 45%; padding-right: 12px; }
+        .gofood-delivery-right { width: 55%; padding-left: 16px; border-left: 1px solid #e5e7eb; }
+        .gofood-tl-item { position: relative; padding-bottom: 16px; }
+        .gofood-tl-item::before { content: ''; position: absolute; left: -21px; top: 2px; width: 11px; height: 11px; border-radius: 50%; }
+        .gofood-tl-item:not(:last-child)::after { content: ''; position: absolute; left: -16px; top: 14px; bottom: -2px; width: 1px; border-left: 2px dotted #d1d5db; }
+        .gofood-tl-green::before { background-color: #00aa5b; border: 2px solid #fff; box-shadow: 0 0 0 1px #00aa5b; }
+        .gofood-tl-orange::before { background-color: #f06400; border: 2px solid #fff; box-shadow: 0 0 0 1px #f06400; }
+        .gofood-tl-icon { position: absolute; left: -19px; top: 4px; color: #fff; font-size: 7px; z-index: 2; }
+        
+        .gofood-footer { text-align: center; margin-top: 24px; padding-bottom: 20px;}
+        .gofood-footer-links { display: flex; justify-content: center; gap: 16px; color: #0036ce; font-weight: 600; font-size: 11px; margin-bottom: 16px; }
+        .gofood-footer-links span { display: flex; align-items: center; gap: 4px; cursor: pointer; text-decoration: underline; }
+        .gofood-footer-links i { color: #00aa5b; text-decoration: none; }
+        .gofood-disclaimer { font-size: 9px; color: #6b7280; line-height: 1.4; max-width: 400px; margin: 0 auto 20px; text-align: center; }
+        .gofood-socials { display: flex; justify-content: center; gap: 16px; margin-top: 10px; }
+        .gofood-socials i { font-size: 18px; color: #1c1c1c; }
+        
+        .receipt-container {
+            padding: 10px;
+            background: white;
+            min-height: 100mm;
+        }
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-100 p-4 md:p-8">
+
+<div class="max-w-6xl mx-auto">
+    <div class="animate-fade-in-up w-full" x-data="notaGenerator()" x-init="init()">
+        <div class="mb-6">
+            <h2 class="text-xl font-semibold text-slate-800">Generate Nota Otomatis (Standalone PHP)</h2>
+            <p class="text-sm text-slate-500 mt-1">Buat struk belanja digital versi native PHP tanpa framework.</p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-6">
+            <!-- Configuration Section -->
+            <section class="flex-1 space-y-6">
+                <div class="bg-white rounded-xl shadow-md border border-slate-100 p-6 space-y-5">
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-indigo-50 p-4 rounded-xl border border-indigo-100 col-span-full">
+                            <label class="block text-sm font-bold text-indigo-900 mb-2">🎨 Pilih Template Struk</label>
+                            <select x-model="receiptStyle" @change="toggleInputs"
+                                class="w-full p-2.5 bg-white border border-indigo-200 rounded-lg text-slate-700 font-semibold focus:ring-2 focus:ring-indigo-500 outline-none">
+                                <option value="style1">Style 1: Bakmi Gocit (Thermal Classic)</option>
+                                <option value="style2">Style 2: Roti'O (Modern Narrow)</option>
+                                <option value="style3">Style 3: GoFood (Digital App)</option>
+                                <option value="style4">Style 4: Laundry (Format Khusus)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 border-t pt-5">
+                        <div class="col-span-full">
+                             <h3 class="text-sm font-bold text-slate-700 mb-3">🏪 Informasi Header</h3>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1" x-text="receiptStyle === 'style4' ? 'Nama Outlet' : (receiptStyle === 'style3' ? 'Nama Resto' : 'Nama Toko')">Nama Toko</label>
+                            <input type="text" x-model="storeName" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div x-show="receiptStyle !== 'style4'">
+                            <label class="block text-xs font-medium text-slate-600 mb-1" x-text="receiptStyle === 'style3' ? 'Alamat Resto' : 'Alamat / Sub-header'">Alamat / Sub-header</label>
+                            <input type="text" x-model="storeAddress" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div x-show="receiptStyle === 'style1' || receiptStyle === 'style2'">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Pax / Ref Code</label>
+                            <input type="text" x-model="paxCount" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div x-show="receiptStyle === 'style1' || receiptStyle === 'style2'">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Kasir</label>
+                            <input type="text" x-model="cashierName" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Nama Customer</label>
+                            <input type="text" x-model="customerName" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Tanggal Transaksi</label>
+                            <input type="date" x-model="transDateRaw" @change="updateDate()" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="space-y-3 border-t pt-5">
+                        <div class="flex justify-between items-center">
+                            <h3 class="text-sm font-bold text-slate-700">🛒 Daftar Item Belanja</h3>
+                            <button type="button" @click="addItem" class="text-indigo-600 text-xs font-bold hover:underline">+ Tambah Item</button>
+                        </div>
+                        <div class="space-y-2 max-h-64 overflow-y-auto pr-2">
+                            <template x-for="(item, index) in items" :key="index">
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100 flex gap-2 items-center">
+                                    <input type="text" x-model="item.name" class="flex-1 p-1.5 border border-slate-200 rounded text-xs outline-none focus:ring-1 focus:ring-indigo-500" placeholder="Nama Menu">
+                                    <input type="text" x-model="item.price" 
+                                           @input="item.price = formatCurrency($event.target.value)"
+                                           class="w-24 p-1.5 border border-slate-200 rounded text-xs outline-none focus:ring-1 focus:ring-indigo-500 text-right" placeholder="Harga">
+                                    <input type="number" x-model.number="item.qty" class="w-12 p-1.5 border border-slate-200 rounded text-xs outline-none focus:ring-1 focus:ring-indigo-500 text-center" placeholder="1">
+                                    <button @click="deleteItem(index)" class="text-rose-400 hover:text-rose-600"><i class="fa-solid fa-trash-can text-xs"></i></button>
+                                </div>
+                            </template>
+                        </div>
+                    </div>
+
+                    <div x-show="receiptStyle === 'style3'" x-cloak class="space-y-4 border-t pt-5">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">🛵 GoFood Details</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">ID Transaksi</label>
+                                <input type="text" x-model="gofood.transId" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Nama Driver</label>
+                                <input type="text" x-model="gofood.driverName" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Kendaraan (Plat • Motor)</label>
+                                <input type="text" x-model="gofood.driverVehicle" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Waktu Antar & Jarak</label>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="gofood.duration" class="w-full p-2 border border-slate-200 rounded-lg text-sm" placeholder="9 menit">
+                                    <input type="text" x-model="gofood.distance" class="w-full p-2 border border-slate-200 rounded-lg text-sm" placeholder="2.7 km">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Biaya Penanganan & Kirim</label>
+                                <input type="text" x-model="gofood.feeHandDeliv" @input="gofood.feeHandDeliv = formatCurrency($event.target.value)" 
+                                       class="w-full p-2 border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Diskon PLUS & Diskon</label>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="gofood.discPlus" @input="gofood.discPlus = formatCurrency($event.target.value)" class="w-full p-2 border border-slate-200 rounded-lg text-sm" placeholder="PLUS">
+                                    <input type="text" x-model="gofood.discTotal" @input="gofood.discTotal = formatCurrency($event.target.value)" class="w-full p-2 border border-slate-200 rounded-lg text-sm" placeholder="Diskon">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Jam Mulai - Sampai (Timeline)</label>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="gofood.startTime" class="w-full p-2 border border-slate-200 rounded-lg text-sm" placeholder="22:27">
+                                    <input type="text" x-model="gofood.endTime" class="w-full p-2 border border-slate-200 rounded-lg text-sm" placeholder="22:36">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Lokasi Tujuan (End)</label>
+                                <input type="text" x-model="gofood.endPlace" class="w-full p-2 border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Alamat Customer (End)</label>
+                                <textarea x-model="gofood.endAddress" class="w-full p-2 border border-slate-200 rounded-lg text-sm" rows="2"></textarea>
+                            </div>
+                            <div class="col-span-2">
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Catatan (Optional)</label>
+                                <input type="text" x-model="gofood.orderNote" class="w-full p-2 border border-slate-200 rounded-lg text-sm">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Metode Bayar Utama</label>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="gofood.payMethod1" class="w-full p-2 border border-slate-200 rounded-lg text-sm" placeholder="GoPay...">
+                                    <input type="text" x-model="gofood.payAmount1" @input="gofood.payAmount1 = formatCurrency($event.target.value)" class="w-24 p-2 border border-slate-200 rounded-lg text-sm">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Metode Bayar Kedua</label>
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="gofood.payMethod2" class="w-full p-2 border border-slate-200 rounded-lg text-sm" placeholder="Cash">
+                                    <input type="text" x-model="gofood.payAmount2" @input="gofood.payAmount2 = formatCurrency($event.target.value)" class="w-24 p-2 border border-slate-200 rounded-lg text-sm">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div x-show="receiptStyle === 'style4'" x-cloak class="space-y-4 border-t pt-5">
+                        <h3 class="text-sm font-bold text-slate-700 mb-3">🧺 Laundry Details</h3>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">No HP</label>
+                                <input type="text" x-model="laundry.custPhone" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">No Invoice (QR)</label>
+                                <input type="text" x-model="laundry.inv" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Nomor Urut</label>
+                                <input type="text" x-model="laundry.urut" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Terima</label>
+                                <input type="text" x-model="laundry.in" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Estimasi Selesai</label>
+                                <input type="text" x-model="laundry.out" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Parfum</label>
+                                <input type="text" x-model="laundry.parfum" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Alamat Konsumen</label>
+                                <input type="text" x-model="laundry.address" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 uppercase">Status Pembayaran</label>
+                                <select x-model="laundry.status" class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500">
+                                    <option value="Belum Lunas">Belum Lunas</option>
+                                    <option value="Lunas">Lunas</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 border-t pt-5">
+                        <div x-show="receiptStyle === 'style1'">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">SVC (Rp)</label>
+                            <input type="text" x-model="svc1" @input="svc1 = formatCurrency($event.target.value)" 
+                                   class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="0">
+                        </div>
+                        <div x-show="receiptStyle === 'style2'">
+                            <label class="block text-xs font-medium text-slate-600 mb-1">Diskon Total (Rp)</label>
+                            <input type="text" x-model="discountGlobal" @input="discountGlobal = formatCurrency($event.target.value)"
+                                   class="w-full p-2 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-indigo-500" placeholder="0">
+                        </div>
+                        <div x-show="receiptStyle !== 'style3'">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Uang Tunai (Cash)</label>
+                            <input type="text" x-model="cashAmount" @input="cashAmount = formatCurrency($event.target.value)"
+                                   class="w-full p-2 border border-indigo-200 bg-indigo-50/30 rounded-lg text-sm font-bold outline-none focus:ring-2 focus:ring-indigo-500" placeholder="0">
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-4">
+                        <button type="button" @click="saveToDatabase" :disabled="saving"
+                            class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2 disabled:opacity-50">
+                            <i class="fa-solid" :class="saving ? 'fa-spinner fa-spin' : 'fa-image'"></i>
+                            <span x-text="saving ? 'Menyimpan...' : 'Download Image (PNG)'"></span>
+                        </button>
+                        <button type="button" @click="downloadPDF"
+                            class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-3 px-4 rounded-xl shadow-lg transition flex justify-center items-center gap-2">
+                            <i class="fa-solid fa-file-pdf"></i> Download PDF
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Preview Section -->
+            <section class="lg:w-[400px] flex flex-col items-center">
+                <div class="sticky top-20 w-full">
+                    <h2 class="text-sm font-bold text-slate-400 mb-4 text-center uppercase tracking-widest">👁️ Preview Nota</h2>
+                    <div class="bg-slate-200 p-8 rounded-2xl shadow-inner border-4 border-slate-300 overflow-hidden flex justify-center">
+                        <div id="receiptPreview" class="transform origin-top scale-[0.85] sm:scale-100 bg-white shadow-xl">
+                            <!-- Content generated by JS -->
+                        </div>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-4 text-center">Nota ini akan otomatis di-capture menjadi gambar/pdf.</p>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+function notaGenerator() {
+    return {
+        receiptStyle: 'style1',
+        storeName: 'FOOD & BEVERAGE INDONESIA',
+        storeAddress: 'BAKMI GOCIT JUANDA G4',
+        transDateRaw: '<?= date('Y-m-d') ?>',
+        transDate: '<?= date('d/m/Y') ?>',
+        paxCount: '1',
+        cashierName: 'CASHIER',
+        customerName: 'TABEL 15',
+        cashAmount: '100.000',
+        svc1: '0',
+        discountGlobal: '0',
+        items: [
+            { name: 'BAKMI AYAM JURAGAN', price: '45.000', qty: 1 }
+        ],
+        gofood: {
+            transId: 'F-3152377887',
+            driverName: 'Putu Ade Chandra Wibawa',
+            driverVehicle: 'DK4781AEM • Yamaha NMAX',
+            distance: '2.7 km',
+            duration: '9 menit',
+            feeHandDeliv: '17.500',
+            discPlus: '10.000',
+            discTotal: '35.300',
+            startTime: '22:27',
+            endTime: '22:36',
+            endPlace: 'Jl. Padma No. 18',
+            endAddress: 'Jl. Padma Gg. XI No.18, Penatih, Kec. Denpasar Tim., Kota Denpasar, Bali 80238, Indonesia',
+            orderNote: 'Tanpa alat makan/sedotan. Makasih udah ngurangin sampah sekali pakai!',
+            payMethod1: 'Bayar pakai GoPay Tabungan by Jago',
+            payAmount1: '19.100',
+            payMethod2: 'Bayar pakai Cash',
+            payAmount2: '60.100'
+        },
+        laundry: {
+            custPhone: '6282334238500',
+            inv: 'BANG2605167438746587',
+            urut: '3',
+            in: 'Sabtu, 16/05/26 10:19',
+            out: 'Minggu, 17/05/26 10:20',
+            parfum: '-',
+            address: 'Jalan Kebalen',
+            status: 'Lunas'
+        },
+        syncData: {
+            project_id: '',
+            user_id: ''
+        },
+        saving: false,
+
+        init() {
+            <?php if (isset($claim) && !empty($claim['generator_data'])): ?>
+                try {
+                    const loadedData = <?= $claim["generator_data"] ?>;
+                    if (loadedData.receiptStyle) this.receiptStyle = loadedData.receiptStyle;
+                    if (loadedData.storeName) this.storeName = loadedData.storeName;
+                    if (loadedData.storeAddress) this.storeAddress = loadedData.storeAddress;
+                    if (loadedData.transDateRaw !== undefined) this.transDateRaw = loadedData.transDateRaw;
+                    if (loadedData.transDate !== undefined) this.transDate = loadedData.transDate;
+                    if (loadedData.paxCount !== undefined) this.paxCount = loadedData.paxCount;
+                    if (loadedData.cashierName !== undefined) this.cashierName = loadedData.cashierName;
+                    if (loadedData.customerName !== undefined) this.customerName = loadedData.customerName;
+                    if (loadedData.cashAmount !== undefined) this.cashAmount = loadedData.cashAmount;
+                    if (loadedData.svc1 !== undefined) this.svc1 = loadedData.svc1;
+                    if (loadedData.discountGlobal !== undefined) this.discountGlobal = loadedData.discountGlobal;
+                    if (loadedData.items !== undefined) this.items = loadedData.items;
+                    if (loadedData.gofood !== undefined) this.gofood = loadedData.gofood;
+                    if (loadedData.laundry !== undefined) this.laundry = loadedData.laundry;
+                    if (loadedData.syncData !== undefined) {
+                        this.syncData.project_id = loadedData.syncData.project_id || '<?= $claim["project_id"] ?>';
+                        this.syncData.user_id = loadedData.syncData.user_id || '<?= $claim["user_id"] ?>';
+                    }
+                } catch(e) { console.error('Error loading old nota config', e); }
+            <?php else: ?>
+                <?php if (isset($claim)): ?>
+                    this.syncData.project_id = '<?= $claim["project_id"] ?>';
+                    this.syncData.user_id = '<?= $claim["user_id"] ?>';
+                <?php endif; ?>
+            <?php endif; ?>
+
+            this.$watch('receiptStyle', () => { this.toggleInputs(); this.updateReceipt(); });
+            this.$watch('storeName', () => this.updateReceipt());
+            this.$watch('storeAddress', () => this.updateReceipt());
+            this.$watch('transDate', () => this.updateReceipt());
+            this.$watch('paxCount', () => this.updateReceipt());
+            this.$watch('cashierName', () => this.updateReceipt());
+            this.$watch('customerName', () => this.updateReceipt());
+            this.$watch('cashAmount', () => this.updateReceipt());
+            this.$watch('svc1', () => this.updateReceipt());
+            this.$watch('discountGlobal', () => this.updateReceipt());
+            this.$watch('items', () => this.updateReceipt(), { deep: true });
+            this.$watch('gofood', () => this.updateReceipt(), { deep: true });
+            this.$watch('laundry', () => this.updateReceipt(), { deep: true });
+            
+            this.updateReceipt();
+        },
+
+        updateDate() {
+            if (!this.transDateRaw) return;
+            const d = this.transDateRaw.split('-');
+            this.transDate = `${d[2]}/${d[1]}/${d[0]}`;
+        },
+
+        toggleInputs() {
+            if (this.receiptStyle === 'style1') {
+                this.storeName = "FOOD & BEVERAGE INDONESIA";
+                this.storeAddress = "BAKMI GOCIT JUANDA G4";
+                this.customerName = "TABEL 15";
+            } else if (this.receiptStyle === 'style2') {
+                this.storeName = "ROTI O BDR JUANDA T1 SBY PERMANEN";
+                this.storeAddress = "www.rotio.id";
+                this.customerName = "UDIN";
+            } else if (this.receiptStyle === 'style3') {
+                this.storeName = "Ayam Gepuk Pak Gembus, Gatot Subroto Bali";
+                this.storeAddress = "Jl. Gatot Subroto 1 No. 25, Denpasar, Bali";
+                this.customerName = "UDIN";
+            } else if (this.receiptStyle === 'style4') {
+                this.storeName = "Kilo Laundry Bangka";
+                this.customerName = "udin";
+                this.items = [
+                    { name: '2 KG WASH IRON 1 DAY (12.000/KG)', price: '12.000', qty: 2 },
+                    { name: 'Ongkir (6.000)', price: '6.000', qty: 1 }
+                ];
+                this.cashAmount = '0';
+                this.laundry = {
+                    custPhone: '6282334238500',
+                    inv: 'BANG2605167438746587',
+                    urut: '3',
+                    in: 'Sabtu, 16/05/26 10:19',
+                    out: 'Minggu, 17/05/26 10:20',
+                    parfum: '-',
+                    address: 'Jalan Kebalen VI No 3',
+                    status: 'Lunas'
+                };
+            }
+        },
+
+        addItem() {
+            this.items.push({ name: '', price: '0', qty: 1 });
+        },
+
+        deleteItem(index) {
+            this.items.splice(index, 1);
+        },
+
+        formatCurrency(value) {
+            if (!value) return '';
+            let val = value.toString().replace(/[^0-9]/g, '');
+            if (val === '') return '';
+            return val.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        },
+
+        unformatCurrency(value) {
+            if (!value) return 0;
+            return parseInt(value.toString().replace(/[^0-9]/g, '')) || 0;
+        },
+
+        formatCurrencyUS(amount) {
+            return new Intl.NumberFormat('en-US').format(amount);
+        },
+
+        formatCurrencyID(amount) {
+            return new Intl.NumberFormat('id-ID').format(amount).replace(/,/g, '.');
+        },
+
+        generateHTML() {
+            let subtotal = 0;
+            this.items.forEach(i => subtotal += (this.unformatCurrency(i.price) * i.qty));
+
+            if (this.receiptStyle === 'style1') {
+                const tax = Math.round(subtotal * 0.10);
+                const total = subtotal + this.unformatCurrency(this.svc1) + tax;
+                const change = this.unformatCurrency(this.cashAmount) - total;
+
+                let itemsHtml = this.items.map(i => `
+                    <div class="flex-between mb-1 text-black">
+                        <div class="text-left flex">
+                            <span class="w-6 text-right mr-2">${i.qty}</span>
+                            <span>${(i.name || 'MENU').toUpperCase()}</span>
+                        </div>
+                        <div class="text-right whitespace-nowrap pl-2">${this.formatCurrencyUS(this.unformatCurrency(i.price) * i.qty)}</div>
+                    </div>
+                `).join('');
+
+                return `
+                <div class="receipt-container thermal-font" style="width: 80mm;">
+                    <div class="text-center mb-1 font-bold" style="font-size:15px;">${this.storeName.toUpperCase()}</div>
+                    <div class="text-center mb-4">${this.storeAddress.toUpperCase()}</div>
+                    <div class="mb-1">
+                        <div class="flex-between">
+                            <div>Pax : ${this.paxCount}</div>
+                            <div class="font-bold">NAME : ${this.customerName.toUpperCase()}</div>
+                        </div>
+                        <div class="flex-between">
+                            <div>POS Title:${this.cashierName.toUpperCase()}</div>
+                            <div>OP:</div>
+                        </div>
+                        <div class="text-right mt-1">${this.transDate}</div>
+                    </div>
+                    <div class="dashed-line"></div>
+                    <div class="my-2">${itemsHtml}</div>
+                    <div class="dashed-line"></div>
+                    <div class="flex-between"><span>SUBTOTAL</span><span>${this.formatCurrencyUS(subtotal)}</span></div>
+                    <div class="flex-between"><span>SVC</span><span>${this.formatCurrencyUS(this.unformatCurrency(this.svc1))}</span></div>
+                    <div class="flex-between mb-1"><span>TAX 10</span><span>${this.formatCurrencyUS(tax)}</span></div>
+                    <div class="dashed-line"></div>
+                    <div class="flex-between font-bold my-2" style="font-size:15px;"><span>TOTAL</span><span>${this.formatCurrencyUS(total)}</span></div>
+                    <div class="flex-between mb-1"><span>CASH</span><span>${this.formatCurrencyUS(this.unformatCurrency(this.cashAmount))}</span></div>
+                    <div class="flex-between font-bold"><span>Change</span><span>${this.formatCurrencyUS(change)}</span></div>
+                    <div class="double-line"></div>
+                    <div class="text-center mt-2"><div>Closed Bill</div><div class="my-1"><- - - - - -${this.transDate}- - - - - -></div></div>
+                </div>`;
+            } else if (this.receiptStyle === 'style2') {
+                const total = subtotal - this.unformatCurrency(this.discountGlobal);
+                const change = this.unformatCurrency(this.cashAmount) - total;
+                const itemsHtml = this.items.map(i => `
+                    <div class="mb-3 text-black">
+                        <div class="text-left mb-1">${i.name || 'Nama Menu'}</div>
+                        <div class="flex justify-between pl-4">
+                            <div>${i.qty} x &nbsp;&nbsp;&nbsp; ${this.formatCurrencyID(this.unformatCurrency(i.price))} =</div>
+                            <div>${this.formatCurrencyID(this.unformatCurrency(i.price) * i.qty)}</div>
+                        </div>
+                    </div>`).join('');
+
+                const row = (label, amt) => `
+                    <div class="flex justify-between mb-1 text-black">
+                        <div class="text-right w-full pr-4 uppercase" style="font-size:9px">${label}</div>
+                        <div class="flex w-[110px] justify-between"><span>RP</span><span>${this.formatCurrencyID(amt)}</span></div>
+                    </div>`;
+
+                return `
+                <div class="receipt-container font-rotio text-black" style="width: 75mm; padding: 8mm 4mm;">
+                    <div class="text-center mb-4">
+                        <div class="mb-1 text-[12px] font-bold">${this.storeName}</div>
+                        <div class="mb-4 text-[11px]">${this.storeAddress}</div>
+                        <div class="text-left text-[11px] leading-tight">
+                            <div class="flex"><span class="w-16">Cashier :</span><span>${this.cashierName} &nbsp; ${this.paxCount}</span></div>
+                            <div class="pl-16 mt-1">${this.transDate}</div>
+                        </div>
+                    </div>
+                    <div class="mb-2">${itemsHtml}</div>
+                    <div class="border-b border-black/20 my-2"></div>
+                    <div class="flex justify-between font-bold mb-1"><div>** SUBTOTAL</div><div>${this.items.reduce((a,b)=>a+b.qty,0)} PCS</div></div>
+                    <div class="mb-1">${row('', subtotal)}${row('DISCOUNT :', this.unformatCurrency(this.discountGlobal))}${row('PEMBULATAN :', 0)}</div>
+                    <div class="border-b border-black/20 my-2"></div>
+                    <div class="mb-1">${row('PAID :', total)}${row('CASH :', this.unformatCurrency(this.cashAmount))}</div>
+                    <div class="border-b border-black/20 my-2"></div>
+                    <div class="mb-4">${row('CHANGE :', change)}</div>
+                    <div class="text-center font-bold">** Terima Kasih **</div>
+                </div>`;
+            } else if (this.receiptStyle === 'style3') {
+                const handlingFee = this.unformatCurrency(this.gofood.feeHandDeliv);
+                const discPlus = this.unformatCurrency(this.gofood.discPlus);
+                const discTotal = this.unformatCurrency(this.gofood.discTotal);
+                const total = subtotal + handlingFee - discPlus - discTotal;
+                
+                const itemsHtml = this.items.map(i => `
+                    <div class="flex mb-1 mt-3">
+                        <div class="font-bold w-6">${i.qty}</div>
+                        <div class="flex-1">${i.name || 'MENU'}</div>
+                        <div class="text-[#4a4a4a] text-[10px] w-20 text-right">@Rp${this.formatCurrencyID(this.unformatCurrency(i.price))}</div>
+                        <div class="font-bold w-24 text-right pr-2 text-[12px]">Rp${this.formatCurrencyID(this.unformatCurrency(i.price) * i.qty)}</div>
+                    </div>`).join('');
+                
+                const noteHtml = this.gofood.orderNote ? `<div class="gofood-subtext mb-3 pr-4">${this.gofood.orderNote}</div>` : '';
+
+                const pay2Html = this.gofood.payMethod2 ? `<div class="flex justify-between mt-1 text-[11px] text-[#1c1c1c]"><div>${this.gofood.payMethod2}</div><div>Rp${this.gofood.payAmount2}</div></div>` : '';
+
+                const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
+                const dayNames = ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+                const d = this.transDateRaw ? new Date(this.transDateRaw) : new Date();
+                const dateStr = `${dayNames[d.getDay()]}, ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
+
+                return `
+                <div class="receipt-container gofood-wrapper" style="width: 110mm;">
+                    <div class="gofood-container">
+                        <div class="gofood-header">
+                            <div class="flex items-center gap-1 group cursor-pointer">
+                                 <svg viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path d="M11 9H9V2H7v7H5V2H3v7c0 2.12 1.66 3.84 3.75 3.97V22h2.5v-9.03C11.34 12.84 13 11.12 13 9V2h-2v7zm5-3v8h2.5v8H21V2c-2.76 0-5 2.24-5 4z"/></svg> 
+                                 <span class="font-bold text-xl tracking-tighter">gofood</span>
+                            </div>
+                            <div class="text-[10px] text-right font-medium opacity-95">
+                                <div>${dateStr}</div>
+                                <div>ID transaksi: ${this.gofood.transId}</div>
+                            </div>
+                        </div>
+                        <div class="gofood-body">
+                            <div class="mb-5 text-[12px]">Hai ${this.customerName},<br><span class="font-bold text-[14px] mt-1 inline-block">Makasih udah pakai GoFood</span></div>
+                            
+                            <div class="gofood-total-box">
+                                <div class="font-bold text-[13px]">Total dibayar</div>
+                                <div class="gofood-green">Rp${this.formatCurrencyID(total)}</div>
+                            </div>
+                            
+                            <div class="gofood-section-title mt-6">Rincian transaksi</div>
+                            ${itemsHtml}
+                            ${noteHtml}
+                            
+                            <div class="flex justify-between font-bold text-[12px] mt-2 border-t border-dashed border-[#e5e7eb] pt-3">
+                                <div>Total harga</div>
+                                <div>Rp${this.formatCurrencyID(subtotal)}</div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-[#1c1c1c]">
+                                <div>Biaya penanganan dan pengiriman</div>
+                                <div>Rp${this.formatCurrencyID(handlingFee)}</div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-[#1c1c1c]">
+                                <div>Diskon PLUS</div>
+                                <div>-Rp${this.formatCurrencyID(discPlus)}</div>
+                            </div>
+                            <div class="flex justify-between mt-1 text-[#1c1c1c] mb-3">
+                                <div>Diskon</div>
+                                <div>-Rp${this.formatCurrencyID(discTotal)}</div>
+                            </div>
+                            
+                            <div class="border-t border-solid border-[#e5e7eb] pt-3">
+                                <div class="flex justify-between font-bold text-[12px]">
+                                    <div>Total pembayaran</div>
+                                    <div class="text-[13px]">Rp${this.formatCurrencyID(total)}</div>
+                                </div>
+                                <div class="flex justify-between mt-2 text-[11px] text-[#1c1c1c]">
+                                    <div>${this.gofood.payMethod1}</div>
+                                    <div>Rp${this.gofood.payAmount1}</div>
+                                </div>
+                                ${pay2Html}
+                            </div>
+                            
+                            <div class="gofood-section-title mt-6">Detail pengantaran</div>
+                            <div class="gofood-delivery-box">
+                                <div class="gofood-delivery-left">
+                                    <div class="font-bold text-[11px]">${this.gofood.driverName}</div>
+                                    <div class="text-[10px] text-[#4a4a4a] mb-3">${this.gofood.driverVehicle}</div>
+                                    <div class="flex items-center gap-2 text-[10px] text-[#1c1c1c] mb-1">
+                                        <i class="fa-solid fa-map-location-dot text-[#00aa5b]"></i> Jarak ${this.gofood.distance}
+                                    </div>
+                                    <div class="flex items-center gap-2 text-[10px] text-[#1c1c1c]">
+                                        <i class="fa-solid fa-clock text-[#00aa5b]"></i> Waktu antar ${this.gofood.duration}
+                                    </div>
+                                </div>
+                                <div class="gofood-delivery-right">
+                                    <div class="gofood-tl-item gofood-tl-green">
+                                        <i class="fa-solid fa-arrow-up gofood-tl-icon"></i>
+                                        <div class="text-[9px] text-[#4a4a4a] leading-tight mb-1">Diantarkan ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()} jam ${this.gofood.startTime} dari</div>
+                                        <div class="font-bold text-[11px] leading-snug">${this.storeName}</div>
+                                        <div class="text-[10px] text-[#1c1c1c] mt-2 leading-tight">${this.storeAddress}</div>
+                                    </div>
+                                    <div class="gofood-tl-item gofood-tl-orange" style="padding-bottom:0;">
+                                        <div class="text-[9px] text-[#4a4a4a] leading-tight mb-1">Sampai ${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()} jam ${this.gofood.endTime} di</div>
+                                        <div class="font-bold text-[11px] leading-snug">${this.gofood.endPlace}</div>
+                                        <div class="text-[10px] text-[#1c1c1c] mt-2 leading-tight">${this.gofood.endAddress}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="gofood-footer">
+                        <div class="gofood-footer-links">
+                            <span><i class="fa-solid fa-circle-question"></i> Bantuan</span>
+                            <span><i class="fa-solid fa-circle-exclamation"></i> Laporkan masalah</span>
+                            <span><i class="fa-solid fa-circle-info"></i> Tentang GoFood</span>
+                        </div>
+                        <div class="gofood-disclaimer">
+                            Total harga final adalah harga yang dibayarkan ketika transaksi selesai. Total harga final bisa berbeda dari estimasi harga ketika transaksi dibuat karena ketersediaan barang atau alasan lainnya. Harga bersifat final. Biaya tambahan seperti tip yang diberikan setelah transaksi selesai tidak dicantumkan di bukti pembayaran ini.
+                        </div>
+                        <div class="text-[11px] text-[#1c1c1c] mb-2">Kontak Gojek lewat</div>
+                        <div class="gofood-socials">
+                            <i class="fa-brands fa-instagram"></i>
+                            <i class="fa-brands fa-twitter"></i>
+                            <i class="fa-brands fa-facebook"></i>
+                            <i class="fa-brands fa-youtube"></i>
+                            <i class="fa-brands fa-linkedin"></i>
+                        </div>
+                    </div>
+                </div>`;
+            } else if (this.receiptStyle === 'style4') {
+                const total = subtotal; 
+                let sisaStr = "";
+                const sisa = total - this.unformatCurrency(this.cashAmount);
+                if(sisa > 0) {
+                    sisaStr = `Rp${this.formatCurrencyID(sisa)}`;
+                } else if(sisa === 0) {
+                    sisaStr = `Rp0`;
+                } else {
+                    sisaStr = `+ Rp${this.formatCurrencyID(Math.abs(sisa))}`;
+                }
+
+                const itemsHtml = this.items.map(i => `
+                    <div class="mb-1 leading-snug break-words pr-2">
+                        > ${i.name}
+                    </div>
+                `).join('');
+
+                let phoneFormatted = this.laundry.custPhone;
+                if(phoneFormatted.length > 9) {
+                    phoneFormatted = phoneFormatted.substring(0,9) + '<br>' + phoneFormatted.substring(9);
+                }
+
+                return `
+                <div class="receipt-container font-laundry flex flex-col" style="width: 75mm; padding: 5mm; background: #fff;">
+                    
+                    <div class="flex items-start mb-4">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${this.laundry.inv}" crossorigin="anonymous" style="width:65px; height:65px;" alt="QR" class="mr-3" />
+                        <div class="text-[15px] leading-tight flex flex-col justify-center">
+                            <div>${this.customerName}</div>
+                            <div>${phoneFormatted}</div>
+                        </div>
+                    </div>
+
+                    <div class="text-[17px] font-bold mb-0">${this.laundry.inv}</div>
+                    <div class="text-[19px] font-bold mb-5">${this.laundry.urut}</div>
+
+                    <div class="grid grid-cols-[80px_10px_1fr] mb-0">
+                        <div>Outlet</div><div>:</div><div>${this.storeName}</div>
+                    </div>
+                    <div class="grid grid-cols-[80px_10px_1fr] mb-0">
+                        <div>Terima</div><div>:</div><div>${this.laundry.in}</div>
+                    </div>
+                    <div class="grid grid-cols-[130px_10px_1fr] mb-0">
+                        <div>Estimasi Selesai</div><div>:</div><div></div>
+                    </div>
+                    <div class="text-left pl-[90px] mb-0">${this.laundry.out}</div>
+                    <div class="grid grid-cols-[60px_10px_1fr] mb-0">
+                        <div>Parfum</div><div>:</div><div>${this.laundry.parfum}</div>
+                    </div>
+                    <div class="mb-4 mt-1">${this.laundry.address}</div>
+
+                    <div class="border-b border-dashed border-black/50 my-3"></div>
+
+                    <div class="mb-2">Layanan :</div>
+                    <div class="mb-2">
+                        ${itemsHtml}
+                    </div>
+
+                    <div class="border-b border-dashed border-black/50 my-3"></div>
+
+                    <div class="grid grid-cols-[90px_10px_1fr] mb-0 font-bold">
+                        <div>Total</div><div>:</div><div>${sisaStr}</div>
+                    </div>
+                    <div class="mt-1 pl-24 font-bold tracking-wide">
+                        ${this.laundry.status}
+                    </div>
+
+                </div>
+                `;
+            }
+            return '';
+        },
+
+        updateReceipt() {
+            const preview = document.getElementById('receiptPreview');
+            if (preview) preview.innerHTML = this.generateHTML();
+        },
+
+        async saveToDatabase() {
+            this.saving = true;
+            try {
+                const canvas = await html2canvas(document.getElementById('receiptPreview'), { 
+                    useCORS: true, 
+                    allowTaint: false 
+                });
+                const imageData = canvas.toDataURL('image/png');
+                
+                // Di versi Standalone, kita langsung men-download gambarnya
+                const link = document.createElement('a');
+                link.download = 'nota_' + new Date().getTime() + '.png';
+                link.href = imageData;
+                link.click();
+                
+                alert('Gambar Nota berhasil di-download ke perangkat Anda!');
+            } catch (e) { 
+                console.error(e); 
+                alert('Terjadi kesalahan saat memproses gambar!'); 
+            } finally { 
+                this.saving = false; 
+            }
+        },
+
+        downloadPDF() {
+            const printContent = this.generateHTML();
+            
+            const iframe = document.createElement('iframe');
+            iframe.style.position = 'fixed';
+            iframe.style.right = '0';
+            iframe.style.bottom = '0';
+            iframe.style.width = '0';
+            iframe.style.height = '0';
+            iframe.style.border = '0';
+            document.body.appendChild(iframe);
+            
+            const styleBlocks = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]')).map(s => s.outerHTML).join('');
+            const receiptWidth = (this.receiptStyle === 'style2' || this.receiptStyle === 'style4') ? '75mm' : (this.receiptStyle === 'style3' ? '110mm' : '80mm');
+            
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(`
+                <html>
+                <head>
+                    <title>Nota</title>
+                    ${styleBlocks}
+                    <style>
+                        @page { margin: 0; size: ${receiptWidth} auto; }
+                        * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; color-adjust: exact !important; }
+                        body { margin: 0; padding: 0; background: #fff; display: block; }
+                        .receipt-container { margin: 0 auto; min-height: auto; box-shadow: none !important; }
+                    </style>
+                </head>
+                <body>
+                    ${printContent}
+                </body>
+                </html>
+            `);
+            iframe.contentWindow.document.close();
+            
+            iframe.contentWindow.focus();
+            setTimeout(() => {
+                iframe.contentWindow.print();
+                setTimeout(() => document.body.removeChild(iframe), 1000);
+            }, 500);
+        }
+    };
+}
+</script>
+
+</body>
+</html>
