@@ -702,7 +702,7 @@
                         };
                     } else if (this.receiptStyle === 'style5') {
                         this.storeName = "MIE GACOAN";
-                        this.storeAddress = "BOGOR PADJAJARAN, JL. Gunung Gede No. 8, IG : @mie.gacoan";
+                        this.storeAddress = "BOGOR PADJAJARAN, JL. Gunung Gede No. 8";
                         this.customerName = "9 k 2 edc";
                         this.cashierName = "shift 1 pos 1";
                         this.items = [
@@ -1044,27 +1044,26 @@
                         return `
                 <div class="receipt-container font-gacoan" style="width: 75mm; padding: 4mm; background: #fff;">
                     <div class="text-center mb-3">
-                        <div class="flex justify-center items-center mb-1">
-                            <div style="border:2px solid #000; border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:18px;">ME"</div>
+                        <div class="text-[20px] font-bold tracking-widest mb-1 uppercase">
+                            ${this.storeName}
                         </div>
-                        <div class="text-[28px] font-bold tracking-tighter" style="font-family: Impact, 'Arial Narrow Bold', sans-serif; line-height:1;">GACOAN</div>
-                        <div class="text-[13px] leading-snug mt-2 uppercase">
-                            \${addressHtml}
+                        <div class="text-[13px] leading-snug mt-1 uppercase">
+                            ${addressHtml}
                         </div>
                     </div>
                     <div class="gacoan-double-dashed"></div>
                     
                     <div class="grid grid-cols-[100px_10px_1fr] mt-2 mb-2 text-[14px]">
-                        <div>Tanggal</div><div>:</div><div>\${dateFormatted}</div>
-                        <div>Jam</div><div>:</div><div>\${this.transTime}</div>
-                        <div>Nama Tamu</div><div>:</div><div>\${this.customerName}</div>
-                        <div>Kasir</div><div>:</div><div>\${this.cashierName}</div>
+                        <div>Tanggal</div><div>:</div><div>${dateFormatted}</div>
+                        <div>Jam</div><div>:</div><div>${this.transTime}</div>
+                        <div>Nama Tamu</div><div>:</div><div>${this.customerName}</div>
+                        <div>Kasir</div><div>:</div><div>${this.cashierName}</div>
                     </div>
                     
                     <div class="gacoan-double-dashed"></div>
                     
                     <div class="my-3 text-[14px]">
-                        \${itemsHtml}
+                        ${itemsHtml}
                     </div>
                     
                     <div class="gacoan-double-dashed"></div>
@@ -1072,11 +1071,11 @@
                     <div class="mt-2 mb-2 text-[14px]">
                         <div class="grid grid-cols-[1fr_auto]">
                             <div class="text-right pr-4">Sub Total :</div>
-                            <div class="text-right min-w-[70px]">\${this.formatCurrencyUS(subtotal)}</div>
+                            <div class="text-right min-w-[70px]">${this.formatCurrencyUS(subtotal)}</div>
                         </div>
                         <div class="grid grid-cols-[1fr_auto] mt-1">
                             <div class="text-right pr-4">Pajak 10% :</div>
-                            <div class="text-right min-w-[70px]">\${this.formatCurrencyUS(tax)}</div>
+                            <div class="text-right min-w-[70px]">${this.formatCurrencyUS(tax)}</div>
                         </div>
                     </div>
                     
@@ -1085,7 +1084,7 @@
                     <div class="mt-2 text-[14px]">
                         <div class="grid grid-cols-[1fr_auto]">
                             <div class="text-right pr-4">Total :</div>
-                            <div class="text-right min-w-[70px]">\${this.formatCurrencyUS(total)}</div>
+                            <div class="text-right min-w-[70px]">${this.formatCurrencyUS(total)}</div>
                         </div>
                     </div>
                 </div>
